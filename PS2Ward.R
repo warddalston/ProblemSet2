@@ -7,7 +7,7 @@ rm(list=ls())
 #Second, set the working directory as appropriate.  This makes the code cleaner and helps to keep track of any saved files.
 setwd("~/Documents/WashU 2nd Year/Applied Stats Programming/Jan 30/PS2/ProblemSet2/")
 
-########### 1. Benford Law statistics ##########
+########### 1. Calculating Violations  ##########
 
 #First, write out several "mini functions" used within the Benford Law Stats function:
 
@@ -37,8 +37,7 @@ ChoGainsD <- function(x){
   return(final)
 }
 
-#### Instructions from Jacob: Write a function to calculate these statistics. The function should take as an input (i) a matrix or vector of election returns and (ii) an option (or options) that controls whether the m statistic should be calculated the d statistic should be calculated or both. The output should be a list containing the results, including the full digit distribution.
-
+#takes as inputs x, a vector or matrix of election results, and statistics, which can be specified as "m" for Leemis M, "d" for Cho-Gains D, or both "m" and "d" which returns both (this is the default).  Any other elements in statistic are ignored unless neither "m" nor "d" are present, in which case the function returns the digit distribution and a message asking the user to set statistic to m and/or d.   
 BenfordLawStats <- function(x,statistic=c("m","d")){  #choose your statistic: m or d! defaults to m. 
   
   #coerce whatever input you give into a numeric matrix.  (vectors become a 1 column matrix.)
