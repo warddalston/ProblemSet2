@@ -9,35 +9,60 @@ setwd("~/Documents/WashU 2nd Year/Applied Stats Programming/Jan 30/PS2/ProblemSe
 
 ########### 1. Benford Law statistics ##########
 
+#First, write out several "mini functions" used within the Benford Law Stats function:
+
+# this little function takes as input a vector, and then returns a character vector of only the first element of that vector
+IntegerSelector <- function(x){
+  sapply(x,substr,start=1,stop=1)}  
+IntegerSelector(19:25) # See it in action. 
+
+# This function is designed to take as input a vector of single digit numbers.  It then uses grep to identify the elements of that vector beggining with each of the 9 single digit positive integers.  Next, it counts how often each of the 9 digits occurs, and returns a vector of length 9 with this information for each digit.  The return vector is arranged in ascending order, and has the single digit integers as names.  (can be used on matrices with the help of apply(), in which case it returns a matrix!)
+LetterCounter <- function(x){
+  out <- sapply(as.character(1:9),grep,x,simplify=FALSE)
+  lengths <- sapply(out,length,USE.NAMES=TRUE)
+  return(lengths)
+}
+
+#Performs the calculations necesary to estimate the Leemis M statistic. The input should be a length 9 vector (such as the columns of the output of my LetterCounter function)  
+LeemisM <- function(x){
+  max(x-log10(1+1/(1:9))) #because of R's vectorization and the fact that the input should be length 9, the use of 1:9 inside of the log10 function works correctly.  
+}
+
+#This performs the calculations necessary for the estimation of the Cho-Gains D statistic.  Again, the input should be length 9.  
+ChoGainsD <- function(x){ 
+  inner <- x-log10(1+1/(1:9)) #takes advantage of vectorization and proportions always having 9 rows as well. 
+  inner.sq <- inner^2 #more vectorization
+  inner.sum <- sum(inner.sq) #vectorize!
+  final <- sqrt(inner.sum) 
+  return(final)
+}
+
+#### Instructions from Jacob: Write a function to calculate these statistics. The function should take as an input (i) a matrix or vector of election returns and (ii) an option (or options) that controls whether the m statistic should be calculated the d statistic should be calculated or both. The output should be a list containing the results, including the full digit distribution.
+
+#go read the part in DVM about switches to get it to do both! 
 BenfordLawStats <- function(x,statistic="m"){  #choose your statistic: m or d! defaults to m. 
   
   #coerce whatever input you give into a numeric matrix.  (vectors become a 1 column matrix.)
-  Vote.Totals <- apply(as.matrix(x),2,as.numeric) 
+  VoteTotals <- apply(as.matrix(x),2,as.numeric) 
   
   # Pick out the first digit of every element in the matrix.
-  First.significant.digit <- apply(as.matrix(Vote.Totals),2,function(x) {sapply(x,substr,start=1,stop=1)} )
+  FirstSignificantDigit <- apply(VoteTotals,2,IntegerSelector)
   
   #Now create a 9 by n (number of columns of input x) matrix with the number of times each integer begins an element within each column 
-  Integer.totals <- apply(First.significant.digit,2,function(x){sapply(as.character(1:9),function(y) length(grep(y,x)))})
+ IntegerTotals <- apply(FirstSignificantDigit,2,LetterCounter)
   
   #Now divide these totals by the total number of rows to get proportions
-  Proportions <- Integer.totals/nrow(Vote.Totals)
+  Proportions <- IntegerTotals/nrow(VoteTotals)
   
   if(statistic=="m"){ 
-    # because of the vectorization of R, and that proportions will always have only 9 rows, 
-    # can simply use apply to perform the calculations necessary. 
-    m.stats <- apply(Proportions,2, function(x) max(x-log10(1+1/(1:9))) )
+  #Proportions should always have 9 rows, meaning that simply using my LeemisM function and apply allows us to estimate this statistic.  
+    m.stats <- apply(Proportions,2, LeemisM )
     names(m.stats) <- colnames(x) #for easily understandable output 
     return(list(M.stats=m.stats))
   } 
   if(statistic=="d"){
-    d.stats <- apply(Proportions,2, function(x){ 
-      inner <- x-log10(1+1/(1:9)) #takes advantage of vectorization and proportions always having 9 rows as well. 
-      inner.sq <- inner^2 #more vectorization
-      inner.sum <- sum(inner.sq) #vectorize!
-      final <- sqrt(inner.sum) 
-    }
-    )
+    #Again, since Proportions should always have 9 rows, the use of ChoGainsD and apply allows us to estimate these statistics.  
+    d.stats <- apply(Proportions,2, ChoGainsD)
     names(d.stats) <- colnames(x) # for easy interpretation
     return(list(d.stats=d.stats))
   }
