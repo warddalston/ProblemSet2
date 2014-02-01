@@ -58,20 +58,21 @@ BenfordLawStats <- function(x,statistic="m"){  #choose your statistic: m or d! d
   #Proportions should always have 9 rows, meaning that simply using my LeemisM function and apply allows us to estimate this statistic.  
     m.stats <- apply(Proportions,2, LeemisM )
     names(m.stats) <- colnames(x) #for easily understandable output 
-    return(list(M.stats=m.stats))
+    return(list(M.stats=m.stats,DigitDistribution=IntegerTotals))
   } 
   if(statistic=="d"){
     #Again, since Proportions should always have 9 rows, the use of ChoGainsD and apply allows us to estimate these statistics.  
     d.stats <- apply(Proportions,2, ChoGainsD)
     names(d.stats) <- colnames(x) # for easy interpretation
-    return(list(d.stats=d.stats))
+    return(list(d.stats=d.stats,DigitDistribution=IntegerTotals))
   }
   if(!statistic%in%c("m","d")){
     print("Please set statistic to m or d!") 
   }
 }
 
-x <- matrix(sample(100:1000,size=80,replace=T),ncol=4) #Some artificial data to show how it works
+x <- matrix(sample(100:1000,size=80,replace=T),ncol=4)
+colnames(x) <- c("This","Bird","Has","Flown")#Some artificial data to show how it works
 BenfordLawStats(x,statistic="m") 
 rm(x)
 
