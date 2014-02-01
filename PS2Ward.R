@@ -38,7 +38,7 @@ ChoGainsD <- function(x){
 }
 
 #takes as inputs x, a vector or matrix of election results, and statistics, which can be specified as "m" for Leemis M, "d" for Cho-Gains D, or both "m" and "d" which returns both (this is the default).  Any other elements in statistic are ignored unless neither "m" nor "d" are present, in which case the function returns the digit distribution and a message asking the user to set statistic to m and/or d.   
-BenfordLawStats <- function(x,statistic=c("m","d")){  #choose your statistic: m or d! defaults to m. 
+BenfordLawStats <- function(x,statistic=c("m","d")){  #choose your statistic: m or d! defaults to both. 
   
   #coerce whatever input you give into a numeric matrix.  (vectors become a 1 column matrix.)
   VoteTotals <- apply(as.matrix(x),2,as.numeric) 
@@ -89,21 +89,22 @@ colnames(x) <- c("This","Bird","Has","Flown")
 BenfordLawStats(x)
 rm(x)
 
-###### Part 2: now add a way to test for significance! ##########
+########### 2. Critical Values  ##########
 
 BenfordLawStatsSignif <- function(x,statistic="m"){  #choose your statistic: m or d! defaults to m. 
   
+  
   #coerce whatever input you give into a numeric matrix.  (vectors become a 1 column matrix.)
-  Vote.Totals <- apply(as.matrix(x),2,as.numeric) 
+  VoteTotals <- apply(as.matrix(x),2,as.numeric) 
   
   # Pick out the first digit of every element in the matrix.
-  First.significant.digit <- apply(as.matrix(Vote.Totals),2,function(x) {sapply(x,substr,start=1,stop=1)} )
+  FirstSignificantDigit <- apply(VoteTotals,2,IntegerSelector)
   
   #Now create a 9 by n (number of columns of input x) matrix with the number of times each integer begins an element within each column 
-  Integer.totals <- apply(First.significant.digit,2,function(x){sapply(as.character(1:9),function(y) length(grep(y,x)))})
+  IntegerTotals <- apply(FirstSignificantDigit,2,LetterCounter)
   
   #Now divide these totals by the total number of rows to get proportions
-  Proportions <- Integer.totals/nrow(Vote.Totals)
+  Proportions <- IntegerTotals/nrow(VoteTotals)
   
   if(statistic=="m"){ 
     # because of the vectorization of R, and that proportions will always have only 9 rows, 
@@ -164,5 +165,5 @@ BenfordLawStatsSignif <- function(x,statistic="m"){  #choose your statistic: m o
 
 x <- matrix(as.character(rep(9,20)),ncol=4,nrow=20) #some sample data
 colnames(x) <- c("Dalston","is","checking his","work")
-BenfordLawStatsSignif(x,statistic="m") #should return with stars!
+BenfordLawStatsSignif(x,statistic="d") #should return with stars!
 rm(x)
