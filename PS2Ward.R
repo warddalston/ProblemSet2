@@ -39,8 +39,7 @@ ChoGainsD <- function(x){
 
 #### Instructions from Jacob: Write a function to calculate these statistics. The function should take as an input (i) a matrix or vector of election returns and (ii) an option (or options) that controls whether the m statistic should be calculated the d statistic should be calculated or both. The output should be a list containing the results, including the full digit distribution.
 
-#go read the part in DVM about switches to get it to do both! 
-BenfordLawStats <- function(x,statistic="m"){  #choose your statistic: m or d! defaults to m. 
+BenfordLawStats <- function(x,statistic=c("m","d")){  #choose your statistic: m or d! defaults to m. 
   
   #coerce whatever input you give into a numeric matrix.  (vectors become a 1 column matrix.)
   VoteTotals <- apply(as.matrix(x),2,as.numeric) 
@@ -54,26 +53,41 @@ BenfordLawStats <- function(x,statistic="m"){  #choose your statistic: m or d! d
   #Now divide these totals by the total number of rows to get proportions
   Proportions <- IntegerTotals/nrow(VoteTotals)
   
-  if(statistic=="m"){ 
+  #for when only M need be calculated
+  if(any(statistic%in%"m") & !any(statistic%in%"d")){ 
   #Proportions should always have 9 rows, meaning that simply using my LeemisM function and apply allows us to estimate this statistic.  
     m.stats <- apply(Proportions,2, LeemisM )
     names(m.stats) <- colnames(x) #for easily understandable output 
-    return(list(M.stats=m.stats,DigitDistribution=IntegerTotals))
+    return(list(LeemisM=m.stats,DigitDistribution=IntegerTotals))
   } 
-  if(statistic=="d"){
+  
+  #for when only D need be calculated
+  if(any(statistic%in%"d") & !any(statistic%in%"m")){
     #Again, since Proportions should always have 9 rows, the use of ChoGainsD and apply allows us to estimate these statistics.  
     d.stats <- apply(Proportions,2, ChoGainsD)
     names(d.stats) <- colnames(x) # for easy interpretation
-    return(list(d.stats=d.stats,DigitDistribution=IntegerTotals))
+    return(list(ChoGainsD=d.stats,DigitDistribution=IntegerTotals))
   }
-  if(!statistic%in%c("m","d")){
-    print("Please set statistic to m or d!") 
+  
+  #both M and D
+  if(any(statistic%in%"m") & any(statistic%in%"d")){
+    m.stats <- apply(Proportions,2, LeemisM )
+    names(m.stats) <- colnames(x) #for easily understandable output 
+    d.stats <- apply(Proportions,2, ChoGainsD)
+    names(d.stats) <- colnames(x) # for easy interpretation
+    return(list(LeemisM=m.stats,ChoGainsD=d.stats,DigitDistribution=IntegerTotals))
+  }
+  
+  #and finally, neither
+  if(any(!statistic%in%c("m","d"))){
+    print("Please set statistic to m and/or d!") 
+    return(list(DigitDistribution=IntegerTotals))
   }
 }
 
-x <- matrix(sample(100:1000,size=80,replace=T),ncol=4)
-colnames(x) <- c("This","Bird","Has","Flown")#Some artificial data to show how it works
-BenfordLawStats(x,statistic="m") 
+x <- matrix(sample(100:1000,size=80,replace=T),ncol=4)#Some artificial data to show how it works
+colnames(x) <- c("This","Bird","Has","Flown") 
+BenfordLawStats(x)
 rm(x)
 
 ###### Part 2: now add a way to test for significance! ##########
