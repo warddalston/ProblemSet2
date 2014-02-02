@@ -149,6 +149,6 @@ print.BenfordLaw <- function(x,digits=3){
    NULL
   }
 }
-try <- BenfordLawStats(x)
 
-print.BenfordLaw(try)
+nines <- rep(9,99)
+BenfordLawStats(nines)
