@@ -72,10 +72,10 @@ BenfordLawStats <- function(x,statistic=c("m","d")){  #choose your statistic: m 
   
   #and finally, neither
   if(any(!statistic%in%c("m","d"))){
-    warning("Please set statistic to m and/or d!") 
+    warning("Please set statistic to m and/or d!") #all you get back is a warning here.  Don't choose things that aren't m or d! 
     stop
   }
-  output <- list(LeemisM=m.stats,ChoGainsD=d.stats,DigitDistribution=IntegerTotals)
+  output <- list(LeemisM=m.stats,ChoGainsD=d.stats,DigitDistribution=IntegerTotals) #put everything together in a list
   class(output) <- "BenfordLaw" #so that I can use a fancy version of print on my function!
   return(output)
 }
@@ -116,36 +116,38 @@ AlphaChecksD <- function(x,...) { #function will check for significance of D sta
   return(x)
 }
 
+#prints the lines of my output functions
 StatPrinter <- function(x){
-  if(!is.null(names(x))){
+  if(!is.null(names(x))){ #if the object has a name, it prints the name alongside the test statistic
   cat("Column name: ", as.name(names(x)),"-", "Test Statistic: ", x, "\n")  
-  } else {cat("Test Statistic:",x,"\n")}
+  } else {cat("Test Statistic:",x,"\n")} #just print the test statistic if there is no assocaited name (mainly when the input to BenfordLawStats is simply a vector!)
 }
 
-print.BenfordLaw <- function(x,digits=3){
-  if(!is.null(x$LeemisM)) {
-    cat("Null hypothesis test of no fraud for Leemis\' m statistic:","\n")
-   StatsToPrint <- sapply(x$LeemisM,AlphaChecksM,digits=digits)  
-    for(i in 1:length(StatsToPrint)){
+#this is my function.  By naming it this way and classifying BenfordLawStats output as "BenfordLaw" it will automatically call when I run the BenfordLawStats function without saving the output to an object.  
+print.BenfordLaw <- function(x,digits=3){ #note: one can change the number of digits reported. 
+  if(!is.null(x$LeemisM)) { #do these things when the Leemis' M is being calculated
+    cat("Null hypothesis test of no fraud for Leemis\' m statistic:","\n") 
+   StatsToPrint <- sapply(x$LeemisM,AlphaChecksM,digits=digits)  #This code checks each test statistic against the critical values to determine significance, and adds the *'s when appropriate
+    for(i in 1:length(StatsToPrint)){ #this prints the output with column names (when applicable).  Couldn't get this to work outside of a for loop (i.e. in with sapply)
       StatPrinter(StatsToPrint[i])
     }
   }
   
-  if(!is.null(x$ChoGainsD) & !is.null(x$LeemisM)){
+  if(!is.null(x$ChoGainsD) & !is.null(x$LeemisM)){ #prints this little line when both M and D are being reported, just to make the output easy to read
     cat("--------------------------","\n")
   }
-  if(!is.null(x$ChoGainsD)) {
+  if(!is.null(x$ChoGainsD)) { #same as the M statistic above, only with the D statistic.
     cat("Null hypothesis test of no fraud for Cho-Gains d statistic:","\n")
     StatsToPrint <- sapply(x$ChoGainsD,AlphaChecksD,digits=digits)  
     for(i in 1:length(StatsToPrint)){
       StatPrinter(StatsToPrint[i])
     }
   }
-  if(!is.null(x$ChoGainsD) & !is.null(x$LeemisM)){
+  if(!is.null(x$ChoGainsD) & !is.null(x$LeemisM)){ #prints the significance codes (unless both D and M are null)
   cat("--------------------------","\n")
   cat("Signif. Codes: \'***\' 0.01 \'**\' 0.05 \'*\' 0.10", "\n") 
   }
-  if(is.null(x$ChoGainsD) & is.null(x$LeemisM)){
+  if(is.null(x$ChoGainsD) & is.null(x$LeemisM)){ #when both D and M are null, do nothing.  All one gets back is the warning written into the BenfordLawStats funciton.  
    NULL
   }
 }
