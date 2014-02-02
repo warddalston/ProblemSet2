@@ -52,118 +52,102 @@ BenfordLawStats <- function(x,statistic=c("m","d")){  #choose your statistic: m 
   #Now divide these totals by the total number of rows to get proportions
   Proportions <- IntegerTotals/nrow(VoteTotals)
   
+  #for when only one of the two stats is calculated...
+  m.stats <- NULL
+  d.stats <- NULL
+  
   #for when only M need be calculated
-  if(any(statistic%in%"m") & !any(statistic%in%"d")){ 
+  if(any(statistic%in%"m")){ 
   #Proportions should always have 9 rows, meaning that simply using my LeemisM function and apply allows us to estimate this statistic.  
     m.stats <- apply(Proportions,2, LeemisM )
     names(m.stats) <- colnames(x) #for easily understandable output 
-    return(list(LeemisM=m.stats,DigitDistribution=IntegerTotals))
   } 
   
   #for when only D need be calculated
-  if(any(statistic%in%"d") & !any(statistic%in%"m")){
+  if(any(statistic%in%"d")){
     #Again, since Proportions should always have 9 rows, the use of ChoGainsD and apply allows us to estimate these statistics.  
     d.stats <- apply(Proportions,2, ChoGainsD)
     names(d.stats) <- colnames(x) # for easy interpretation
-    return(list(ChoGainsD=d.stats,DigitDistribution=IntegerTotals))
-  }
-  
-  #both M and D
-  if(any(statistic%in%"m") & any(statistic%in%"d")){
-    m.stats <- apply(Proportions,2, LeemisM )
-    names(m.stats) <- colnames(x) #for easily understandable output 
-    d.stats <- apply(Proportions,2, ChoGainsD)
-    names(d.stats) <- colnames(x) # for easy interpretation
-    return(list(LeemisM=m.stats,ChoGainsD=d.stats,DigitDistribution=IntegerTotals))
   }
   
   #and finally, neither
   if(any(!statistic%in%c("m","d"))){
-    print("Please set statistic to m and/or d!") 
+    warning("Please set statistic to m and/or d!") 
     return(list(DigitDistribution=IntegerTotals))
   }
+  output <- list(LeemisM=m.stats,ChoGainsD=d.stats,DigitDistribution=IntegerTotals)
+  class(output) <- "BenfordLaw" #so that I can use a fancy version of print on my function!
+  return(output)
 }
 
 x <- matrix(sample(100:1000,size=80,replace=T),ncol=4)#Some artificial data to show how it works
 colnames(x) <- c("This","Bird","Has","Flown") 
-BenfordLawStats(x)
+x<- BenfordLawStats(x)
 rm(x)
 
 ########### 2. Critical Values  ##########
 
-BenfordLawStatsSignif <- function(x,statistic="m"){  #choose your statistic: m or d! defaults to m. 
-  
-  
-  #coerce whatever input you give into a numeric matrix.  (vectors become a 1 column matrix.)
-  VoteTotals <- apply(as.matrix(x),2,as.numeric) 
-  
-  # Pick out the first digit of every element in the matrix.
-  FirstSignificantDigit <- apply(VoteTotals,2,IntegerSelector)
-  
-  #Now create a 9 by n (number of columns of input x) matrix with the number of times each integer begins an element within each column 
-  IntegerTotals <- apply(FirstSignificantDigit,2,LetterCounter)
-  
-  #Now divide these totals by the total number of rows to get proportions
-  Proportions <- IntegerTotals/nrow(VoteTotals)
-  
-  if(statistic=="m"){ 
-    # because of the vectorization of R, and that proportions will always have only 9 rows, 
-    # can simply use apply to perform the calculations necessary. 
-    m.stats <- apply(Proportions,2, function(x) max(x-log10(1+1/(1:9))) )
-    names(m.stats) <- colnames(x) #for easily understandable output 
-    alpha.checks.m <- function(x) { #function will check for significance 
-      
-      if( 0.851 <= x & x < .967 ){ # 0.10
-        x <- paste(round(x,3),"*",sep="") # single star
-      }
-      if( 0.967 <= x & x < 1.212){ #0.05
-        x <- paste(round(x,3),"**",sep="") # two stars
-      }
-      if( 1.212 <= x ){ #0.01
-        x <- paste(round(x,3),"***",sep="") #three stars 
-      }
-      return(x)
-    }
-    print("* indicates rejection of the null hypothesis at the alpha = 0.10 level")
-    print("** indicates rejection of the null hypothesis at the alpha = 0.05 level")
-    print("*** indicates rejection of the null hypothesis at the alpha = 0.01 level")
-    print("Caution: The presence or lack of stars is not the only way to make inferences from statistical test")
-    return(list(m.stats=sapply(m.stats,alpha.checks.m,simplify=TRUE,USE.NAMES=TRUE)))
-  } 
-  if(statistic=="d"){
-    d.stats <- apply(Proportions,2, function(x){ 
-      inner <- x-log10(1+1/(1:9)) #takes advantage of vectorization and proportions always having 9 rows as well. 
-      inner.sq <- inner^2 #more vectorization
-      inner.sum <- sum(inner.sq) #vectorize!
-      final <- sqrt(inner.sum) 
-    }
-    )
-    names(d.stats) <- colnames(x) # for easy interpretation
-    alpha.checks.d <- function(x) { #function will check for significance 
-      
-      if( 1.212 <= x & x < 1.330 ){ # 0.10
-        x <- paste(round(x,3),"*",sep="") # single star
-      }
-      if( 1.330 <= x & x < 1.569){ #0.05
-        x <- paste(round(x,3),"**",sep="") # two stars
-      }
-      if( 1.569 <= x ){ #0.01
-        x <- paste(round(x,3),"***",sep="") #three stars 
-      }
-      return(x)
-    }
-    print("* indicates rejection of the null hypothesis at the alpha = 0.10 level")
-    print("** indicates rejection of the null hypothesis at the alpha = 0.05 level")
-    print("*** indicates rejection of the null hypothesis at the alpha = 0.01 level")
-    print("Caution: Alpha levels are arbitraily chosen, and there is nothing inherently special about alpha=.05")
-    return(list(d.stats=sapply(d.stats,alpha.checks.d,simplify=TRUE,USE.NAMES=TRUE)))
+#some functions to call within my function:
+
+AlphaChecksM <- function(x,...) { #function will check for significance of M stats
+    x <- round(x,...)
+  if( 0.851 <= x & x < .967 ){ # 0.10
+    x <- paste(round(x,...),"*",sep="") # single star
   }
-  if(!statistic%in%c("m","d")){
-    print("Please set statistic to m or d!") 
+  if( 0.967 <= x & x < 1.212){ #0.05
+    x <- paste(round(x,...),"**",sep="") # two stars
   }
+  if( 1.212 <= x ){ #0.01
+    x <- paste(round(x,...),"***",sep="") #three stars 
+  }
+  return(x)
 }
 
-x <- matrix(as.character(rep(9,20)),ncol=4,nrow=20) #some sample data
-colnames(x) <- c("Dalston","is","checking his","work")
-BenfordLawStatsSignif(x,statistic="d") #should return with stars!
+AlphaChecksD <- function(x,...) { #function will check for significance of D stats
+    x <- round(x,...)
+  if( 1.212 <= x & x < 1.330 ){ # 0.10
+    x <- paste(round(x,...),"*",sep="") # single star
+  }
+  if( 1.330 <= x & x < 1.569){ #0.05
+    x <- paste(round(x,...),"**",sep="") # two stars
+  }
+  if( 1.569 <= x ){ #0.01
+    x <- paste(round(x,...),"***",sep="") #three stars 
+  }
+  return(x)
+}
+
+StatPrinter <- function(x){
+  cat("Column name: ", as.name(names(x)),"-", "Test Statistic: ", x, "\n")   
+}
+
+print.BenfordLaw <- function(x,...){
+  if(!is.null(x$LeemisM)) {
+    cat("Null hypothesis of no fraud test for Leemis\' m statistic:","\n")
+   StatsToPrint <- sapply(x$LeemisM,AlphaChecksM,digits=3)  
+    for(i in 1:length(StatsToPrint)){
+      StatPrinter(StatsToPrint[i])
+    }
+  }
+  
+  if(!is.null(x$ChoGainsD) & !is.null(x$LeemisM)){
+    cat("--------------------------","\n")
+  }
+  if(!is.null(x$ChoGainsD)) {
+    cat("Null hypothesis of no fraud test for Cho-Gains d statistic:","\n")
+    StatsToPrint <- sapply(x$ChoGainsD,AlphaChecksD,digits=3)  
+    for(i in 1:length(StatsToPrint)){
+      StatPrinter(StatsToPrint[i])
+    }
+  }
+  cat("--------------------------","\n")
+  cat("Signif. Codes: \'***\' 0.01 \'**\' 0.05 \'*\' 0.10", "\n") 
+}
+
+print(x)
+
+x <- as.character(rep(9,20)) #some sample data
+names(x) <- c("Dalston")
+BenfordLawStats(x)
+print(BenfordLawStats(x)) #should return with stars!
 rm(x)
