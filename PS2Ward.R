@@ -60,7 +60,7 @@ BenfordLawStats <- function(x,statistic=c("m","d")){  #choose your statistic: m 
   if(any(statistic%in%"m")){ 
   #Proportions should always have 9 rows, meaning that simply using my LeemisM function and apply allows us to estimate this statistic.  
     m.stats <- apply(Proportions,2, LeemisM )
-    names(m.stats) <- colnames(x) #for easily understandable output 
+    names(m.stats) <- colnames(VoteTotals) #for easily understandable output 
   } 
   
   #for when only D need be calculated
@@ -73,7 +73,7 @@ BenfordLawStats <- function(x,statistic=c("m","d")){  #choose your statistic: m 
   #and finally, neither
   if(any(!statistic%in%c("m","d"))){
     warning("Please set statistic to m and/or d!") 
-    return(list(DigitDistribution=IntegerTotals))
+    stop
   }
   output <- list(LeemisM=m.stats,ChoGainsD=d.stats,DigitDistribution=IntegerTotals)
   class(output) <- "BenfordLaw" #so that I can use a fancy version of print on my function!
@@ -82,8 +82,7 @@ BenfordLawStats <- function(x,statistic=c("m","d")){  #choose your statistic: m 
 
 x <- matrix(sample(100:1000,size=80,replace=T),ncol=4)#Some artificial data to show how it works
 colnames(x) <- c("This","Bird","Has","Flown") 
-x<- BenfordLawStats(x)
-rm(x)
+BenfordLawStats(x)
 
 ########### 2. Critical Values  ##########
 
@@ -118,13 +117,15 @@ AlphaChecksD <- function(x,...) { #function will check for significance of D sta
 }
 
 StatPrinter <- function(x){
-  cat("Column name: ", as.name(names(x)),"-", "Test Statistic: ", x, "\n")   
+  if(!is.null(names(x))){
+  cat("Column name: ", as.name(names(x)),"-", "Test Statistic: ", x, "\n")  
+  } else {cat("Test Statistic:",x,"\n")}
 }
 
-print.BenfordLaw <- function(x,...){
+print.BenfordLaw <- function(x,digits=3){
   if(!is.null(x$LeemisM)) {
-    cat("Null hypothesis of no fraud test for Leemis\' m statistic:","\n")
-   StatsToPrint <- sapply(x$LeemisM,AlphaChecksM,digits=3)  
+    cat("Null hypothesis test of no fraud for Leemis\' m statistic:","\n")
+   StatsToPrint <- sapply(x$LeemisM,AlphaChecksM,digits=digits)  
     for(i in 1:length(StatsToPrint)){
       StatPrinter(StatsToPrint[i])
     }
@@ -134,20 +135,20 @@ print.BenfordLaw <- function(x,...){
     cat("--------------------------","\n")
   }
   if(!is.null(x$ChoGainsD)) {
-    cat("Null hypothesis of no fraud test for Cho-Gains d statistic:","\n")
-    StatsToPrint <- sapply(x$ChoGainsD,AlphaChecksD,digits=3)  
+    cat("Null hypothesis test of no fraud for Cho-Gains d statistic:","\n")
+    StatsToPrint <- sapply(x$ChoGainsD,AlphaChecksD,digits=digits)  
     for(i in 1:length(StatsToPrint)){
       StatPrinter(StatsToPrint[i])
     }
   }
+  if(!is.null(x$ChoGainsD) & !is.null(x$LeemisM)){
   cat("--------------------------","\n")
   cat("Signif. Codes: \'***\' 0.01 \'**\' 0.05 \'*\' 0.10", "\n") 
+  }
+  if(is.null(x$ChoGainsD) & is.null(x$LeemisM)){
+   NULL
+  }
 }
+try <- BenfordLawStats(x)
 
-print(x)
-
-x <- as.character(rep(9,20)) #some sample data
-names(x) <- c("Dalston")
-BenfordLawStats(x)
-print(BenfordLawStats(x)) #should return with stars!
-rm(x)
+print.BenfordLaw(try)
