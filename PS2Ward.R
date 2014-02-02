@@ -126,7 +126,8 @@ StatPrinter <- function(x){
 #this is my function.  By naming it this way and classifying BenfordLawStats output as "BenfordLaw" it will automatically call when I run the BenfordLawStats function without saving the output to an object.  
 print.BenfordLaw <- function(x,digits=3){ #note: one can change the number of digits reported. 
   if(!is.null(x$LeemisM)) { #do these things when the Leemis' M is being calculated
-    cat("Null hypothesis test of no fraud for Leemis\' m statistic:","\n") 
+    cat("Null hypothesis: no fraud","\n")
+    cat("Statistic: Leemis\' m","\n")
    StatsToPrint <- sapply(x$LeemisM,AlphaChecksM,digits=digits)  #This code checks each test statistic against the critical values to determine significance, and adds the *'s when appropriate
     for(i in 1:length(StatsToPrint)){ #this prints the output with column names (when applicable).  Couldn't get this to work outside of a for loop (i.e. in with sapply)
       StatPrinter(StatsToPrint[i])
@@ -137,7 +138,8 @@ print.BenfordLaw <- function(x,digits=3){ #note: one can change the number of di
     cat("--------------------------","\n")
   }
   if(!is.null(x$ChoGainsD)) { #same as the M statistic above, only with the D statistic.
-    cat("Null hypothesis test of no fraud for Cho-Gains d statistic:","\n")
+    cat("Null hypothesis: no fraud","\n")
+    cat("Statistic: Cho-Gains\' d","\n")
     StatsToPrint <- sapply(x$ChoGainsD,AlphaChecksD,digits=digits)  
     for(i in 1:length(StatsToPrint)){
       StatPrinter(StatsToPrint[i])
@@ -145,7 +147,7 @@ print.BenfordLaw <- function(x,digits=3){ #note: one can change the number of di
   }
   if(!is.null(x$ChoGainsD) & !is.null(x$LeemisM)){ #prints the significance codes (unless both D and M are null)
   cat("--------------------------","\n")
-  cat("Signif. Codes: \'***\' 0.01 \'**\' 0.05 \'*\' 0.10", "\n") 
+  cat("Signif. codes: \'***\' 0.01 \'**\' 0.05 \'*\' 0.10", "\n") 
   }
   if(is.null(x$ChoGainsD) & is.null(x$LeemisM)){ #when both D and M are null, do nothing.  All one gets back is the warning written into the BenfordLawStats funciton.  
    NULL
@@ -154,3 +156,4 @@ print.BenfordLaw <- function(x,digits=3){ #note: one can change the number of di
 
 nines <- rep(9,99)
 BenfordLawStats(nines)
+
