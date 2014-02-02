@@ -147,7 +147,8 @@ print.BenfordLaw <- function(x,digits=3){ #note: one can change the number of di
   }
   if(!is.null(x$ChoGainsD) & !is.null(x$LeemisM)){ #prints the significance codes (unless both D and M are null)
   cat("--------------------------","\n")
-  cat("Signif. codes: \'***\' 0.01 \'**\' 0.05 \'*\' 0.10", "\n") 
+  cat("Level of critical value met for null hypothesis rejection:","\n")
+  cat("\'***\' 0.01 \'**\' 0.05 \'*\' 0.10", "\n") 
   }
   if(is.null(x$ChoGainsD) & is.null(x$LeemisM)){ #when both D and M are null, do nothing.  All one gets back is the warning written into the BenfordLawStats funciton.  
    NULL
@@ -157,3 +158,28 @@ print.BenfordLaw <- function(x,digits=3){ #note: one can change the number of di
 nines <- rep(9,99)
 BenfordLawStats(nines)
 
+########### 3. Testing ##########
+
+#1. Develop a function that will unit test your function. This function can be designed in any way you like, but bust meet the following conditions:
+
+  #A. You must be able to run all of hte unit tests using a single function.  This will probably be easiest if you write sub-functions
+
+  #B. It must calculate the Benford’s distribution and test statistics for some dataset (that you must choose) where Benford’s law is met.
+
+  #C. It must calculate the Benford’s distribution and test statistics for some dataset (that you must choose) where Benford’s law is not met.
+
+  #D. It must use your functions above to compare to the “truth” for the digit distributions and two test statistics.
+
+  #E. It must return a ’TRUE’ if all unit tests are passed.
+
+  #F. It must return a ’FALSE’ if all unit test are not passed, and it must clearly identifywhere the function is broken. To be clear, it should be able to identify when:
+
+    #The function calculates the wrong Benford’s distribution for dataset 1
+  
+    #The function calculates the wrong Benford’s distribution for dataset 2
+
+    #The function calculates the m or D statistic for dataset 1
+
+    #The function calculates the m or D statistic for dataset 2
+
+#2.For each way that the function can fail this test, create a branch where you edit the code in some way to make the code fail to pass the unit testing.
