@@ -163,6 +163,10 @@ BenfordLawStats(nines)
 ########### 3. Testing ##########
 
 #1. Develop a function that will unit test your function. This function can be designed in any way you like, but bust meet the following conditions:
+set.seed(1801)
+TestData1 <- rnbinom(10,3,.3)
+
+BLawTest <- function(TestData1)
 
   #A. You must be able to run all of hte unit tests using a single function.  This will probably be easiest if you write sub-functions
 
