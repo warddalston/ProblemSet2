@@ -147,7 +147,7 @@ print.BenfordLaw <- function(x,digits=3){ #note: one can change the number of di
       StatPrinter(StatsToPrint[i])
     }
   }
-  if(!is.null(x$ChoGainsD) & !is.null(x$LeemisM)){ #prints the significance codes (unless both D and M are null)
+  if(!is.null(x$ChoGainsD) | !is.null(x$LeemisM)){ #prints the significance codes (unless both D and M are null)
   cat("--------------------------","\n")
   cat("Level of critical value met for null hypothesis rejection:","\n")
   cat("\'***\' 0.01 \'**\' 0.05 \'*\' 0.10", "\n") 
@@ -165,8 +165,58 @@ BenfordLawStats(nines)
 #1. Develop a function that will unit test your function. This function can be designed in any way you like, but bust meet the following conditions:
 set.seed(1801)
 TestData1 <- rnbinom(10,3,.3)
+TrueTestDataDist <- c(3,1,0,2,0,2,2,0,0)
+TrueTestDataProp <- c(.3,.1,0,.2,0,.2,.2,0,0)
+Mlogs <- -log10(1+1/1:9)
+TrueMstats <- TrueTestDataProp+Mlogs
+sqrt(10)*max(TrueMstats) # 0.4490689 
+TrueTestDataLeemisM <- sqrt(10)*max(TrueMstats)
 
-BLawTest <- function(TestData1)
+TrueDSquared <- TrueMstats^2
+TrueDSum <- sum(TrueDSquared)
+TrueDroot <- sqrt(TrueDSum)
+TrueTestDataChoGainsD <- sqrt(10)*TrueDroot
+
+#The function takes some test data, and then the "true" statistic and distribution for this data, plus the number of digits to calculate equality to 
+BLawTest <- function(TestData,TrueTestDataDist,TrueTestDataLeemisM,TrueTestDataChoGainsD,digits=3){
+  output <- BenfordLawStats(TestData) #first, run my function and store the results.  
+  
+  result <- c(0,0,0) #this is the indicator to return at the end of the function to determine if things worked right
+  
+  #now, begin some comparisons: First, Leemis m
+  if(identical(round(output$LeemisM,digits=3),round(TrueTestDataLeemisM,3))){ #use the identical funciton because it is more accurate with digits. 
+    result[1] <- 1
+  } else { 
+  #when this is not true it prints a message telling you where it failed
+  cat("Unit Test failed at Leemis\' m","\n") 
+  }
+  
+  #Second, the Cho-Gains d
+  if(identical(round(output$ChoGainsD,digits=3),round(TrueTestDataChoGainsD,3))){
+    result[2] <- 1 
+  } else { 
+  cat("Unit Test failed at Cho-Gains\' d","\n")
+  }
+  
+  #Finally, compare the Benford Distributions
+  if(all(mapply(identical,as.numeric(output$DigitDistribution),as.numeric(TrueTestDataDist)))){
+    result[3] <- 1
+  } else { 
+  cat("Unit Test failed at Benford Distribution","\n")
+  }
+  
+  #Finally, determine if all tests are passed
+  if(sum(result)==3) { 
+    test.result <- TRUE
+  } else { 
+    test.result <- FALSE
+  }
+  
+  #the result is a true or false plus any messages printed into the console with cat()
+  return(test.result)
+}
+
+BLawTest(TestData1, TrueTestDataDist,TrueTestDataLeemisM,TrueTestDataChoGainsD,digits=3)
 
   #A. You must be able to run all of hte unit tests using a single function.  This will probably be easiest if you write sub-functions
 
