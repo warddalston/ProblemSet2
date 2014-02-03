@@ -184,7 +184,10 @@ BLawTest <- function(TestData,TrueTestDataDist,TrueTestDataLeemisM,TrueTestDataC
   result <- c(0,0,0) #this is the indicator to return at the end of the function to determine if things worked right
   
   #now, begin some comparisons: First, Leemis m
-  if(identical(round(output$LeemisM,digits=3),round(TrueTestDataLeemisM,3))){ #use the identical funciton because it is more accurate with digits. 
+  functionM <- round(output$LeemisM,digits=3)
+  TrueM <- round(TrueTestDataLeemisM,3)
+  Mcomparisons <- mapply(identical,functionM,TrueM)
+  if(all(Mcomparisons)){ #use the identical funciton because it is more accurate with digits. 
     result[1] <- 1
   } else { 
   #when this is not true it prints a message telling you where it failed
@@ -192,7 +195,10 @@ BLawTest <- function(TestData,TrueTestDataDist,TrueTestDataLeemisM,TrueTestDataC
   }
   
   #Second, the Cho-Gains d
-  if(identical(round(output$ChoGainsD,digits=3),round(TrueTestDataChoGainsD,3))){
+  functionD <- round(output$ChoGainsD,digits=3)
+  TrueD <- round(TrueTestDataChoGainsD,3)
+  Dcomparisons <- mapply(identical,functionD,TrueD)
+  if(all(Dcomparisons)){
     result[2] <- 1 
   } else { 
   cat("Unit Test failed at Cho-Gains\' d","\n")
@@ -239,3 +245,4 @@ BLawTest(TestData1, TrueTestDataDist,TrueTestDataLeemisM,TrueTestDataChoGainsD,d
     #The function calculates the m or D statistic for dataset 2
 
 #2.For each way that the function can fail this test, create a branch where you edit the code in some way to make the code fail to pass the unit testing.
+
