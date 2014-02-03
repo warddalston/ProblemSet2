@@ -78,7 +78,7 @@ BenfordLawStats <- function(x,statistic=c("m","d")){  #choose your statistic: m 
     stop
   }
   output <- list(LeemisM=m.stats,ChoGainsD=d.stats,DigitDistribution=IntegerTotals) #put everything together in a list
-  class(output) <- "BenfordLaw" #so that I can use a fancy version of print on my function!
+  class(output) <- "benfords" #so that I can use a fancy version of print on my function!
   return(output)
 }
 
@@ -126,7 +126,7 @@ StatPrinter <- function(x){
 }
 
 #this is my function.  By naming it this way and classifying BenfordLawStats output as "BenfordLaw" it will automatically call when I run the BenfordLawStats function without saving the output to an object.  
-print.BenfordLaw <- function(x,digits=3){ #note: one can change the number of digits reported. 
+print.benfords <- function(x,digits=3){ #note: one can change the number of digits reported. 
   if(!is.null(x$LeemisM)) { #do these things when the Leemis' M is being calculated
     cat("Null hypothesis: no fraud","\n")
     cat("Statistic: Leemis\' m","\n")
