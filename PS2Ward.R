@@ -168,89 +168,136 @@ BenfordLawStats(nines)
 #1. Develop a function that will unit test your function. This function can be designed in any way you like, but bust meet the following conditions:
 
 #The function takes some test data, and then the "true" statistic and distribution for this data, plus the number of digits to calculate equality to 
-BLawTest <- function(TestData,TrueTestDataDist,TrueTestDataLeemisM,TrueTestDataChoGainsD,digits=3){
-  output <- BenfordLawStats(TestData) #first, run my function and store the results.  
+BLawTest <- function(TestData1,TrueTestData1Dist,TrueTestData1LeemisM,TrueTestData1ChoGainsD,TestData2=NULL,TrueTestData2Dist=NULL,TrueTestData2LeemisM=NULL,TrueTestData2ChoGainsD=NULL,digits=3){
+
+  #The funciton is divided into two sections: One for Test Data 1, another for Test Data 2. At least one set of Test Data is required.  The second set of Test Data is optional
   
-  result <- c(0,0,0) #this is the indicator to return at the end of the function to determine if things worked right
+  output1 <- BenfordLawStats(TestData1) #first, run my function and store the results.  
+  
+  result1 <- c(0,0,0) #this is the indicator to return at the end of the function to determine if things worked right
   
   #now, begin some comparisons: First, Leemis m
-  functionM <- round(output$LeemisM,digits=3)
-  TrueM <- round(TrueTestDataLeemisM,3)
-  Mcomparisons <- mapply(identical,functionM,TrueM)
-  if(all(Mcomparisons)){ #use the identical funciton because it is more accurate with digits. 
-    result[1] <- 1
+  functionM1 <- round(output1$LeemisM,digits=3)
+  TrueM1 <- round(TrueTestData1LeemisM,3)
+  Mcomparisons1 <- mapply(identical,functionM1,TrueM1)
+  if(all(Mcomparisons1)){ #use the identical funciton because it is more accurate with digits. 
+    result1[1] <- 1
   } else { 
   #when this is not true it prints a message telling you where it failed
-  cat("Unit Test failed at Leemis\' m","\n") 
+  cat("Unit Test of Test Data 1 failed at Leemis\' m","\n") 
   }
   
   #Second, the Cho-Gains d
-  functionD <- round(output$ChoGainsD,digits=3)
-  TrueD <- round(TrueTestDataChoGainsD,3)
-  Dcomparisons <- mapply(identical,functionD,TrueD)
-  if(all(Dcomparisons)){
-    result[2] <- 1 
+  functionD1 <- round(output1$ChoGainsD,digits=3)
+  TrueD1 <- round(TrueTestData1ChoGainsD,3)
+  Dcomparisons1 <- mapply(identical,functionD1,TrueD1)
+  if(all(Dcomparisons1)){
+    result1[2] <- 1 
   } else { 
-  cat("Unit Test failed at Cho-Gains\' d","\n")
+  cat("Unit Test of Test Data 1 failed at Cho-Gains\' d","\n")
   }
   
   #Finally, compare the Benford Distributions
-  if(all(mapply(identical,as.numeric(output$DigitDistribution),as.numeric(TrueTestDataDist)))){
-    result[3] <- 1
+  if(all(mapply(identical,as.numeric(output1$DigitDistribution),as.numeric(TrueTestData1Dist)))){
+    result1[3] <- 1
   } else { 
-  cat("Unit Test failed at Benford Distribution","\n")
+  cat("Unit Test of Test Data 1 failed at Benford Distribution","\n")
+  }
+  
+  #Make a little vector to be used for storing my result
+  test.result <- NULL
+  
+  #Finally, determine if all tests are passed
+  if(sum(result1)==3) { 
+    test.result[1] <- TRUE
+    names(test.result) <- "Test Data 1"
+  } else { 
+    test.result[1] <- FALSE
+    names(test.result) <- "Test Data 1"
+  }
+  
+  #Here begins the section for Test Data 2.  There's a switch around the whole thing, which makes it not run if no data is supplied by the user for Test Data 2!
+  
+  output2 <- NULL #so that the output still works if the user decides not to include two data sets.  
+  
+  if(!is.null(TestData2)){
+    
+  output2 <- BenfordLawStats(TestData2) #first, run my function and store the results.  
+  
+  result2 <- c(0,0,0) #this is the indicator to return at the end of the function to determine if things worked right
+  
+  #now, begin some comparisons: First, Leemis m
+  functionM2 <- round(output2$LeemisM,digits=3)
+  TrueM2 <- round(TrueTestData2LeemisM,3)
+  Mcomparisons2 <- mapply(identical,functionM2,TrueM2)
+  if(all(Mcomparisons2)){ #use the identical funciton because it is more accurate with digits. 
+    result2[1] <- 1
+  } else { 
+    #when this is not true it prints a message telling you where it failed
+    cat("Unit Test of Test Data 2 failed at Leemis\' m","\n") 
+  }
+  
+  #Second, the Cho-Gains d
+  functionD2 <- round(output2$ChoGainsD,digits=3)
+  TrueD2 <- round(TrueTestData2ChoGainsD,3)
+  Dcomparisons2 <- mapply(identical,functionD2,TrueD2)
+  if(all(Dcomparisons2)){
+    result2[2] <- 1 
+  } else { 
+    cat("Unit Test of Test Data 2 failed at Cho-Gains\' d","\n")
+  }
+  
+  #Finally, compare the Benford Distributions
+  if(all(mapply(identical,as.numeric(output2$DigitDistribution),as.numeric(TrueTestData2Dist)))){
+    result2[3] <- 1
+  } else { 
+    cat("Unit Test of Test Data 2 failed at Benford Distribution","\n")
   }
   
   #Finally, determine if all tests are passed
-  if(sum(result)==3) { 
-    test.result <- TRUE
+  if(sum(result2)==3) { 
+    test.result[2] <- TRUE
+    names(test.result) <- c("Test Data 1", "Test Data 2")
   } else { 
-    test.result <- FALSE
+    test.result[2] <- FALSE
+    names(test.result) <- c("Test Data 1", "Test Data 2")
   }
-  
+  }
   #the result is a true or false plus any messages printed into the console with cat()
-  return(test.result)
+  return(list(TestResult=test.result,TestData1Results=output1,TestData2Results=output2))
 }
 
 # Make up some random data, and calculate the "True Values" for this data
 set.seed(1801) #for replicatability 
-TestData1 <- rnbinom(10,3,.3) #this is data that meets Benford's law! 
-TrueTestDataDist <- c(3,1,0,2,0,2,2,0,0)
-TrueTestDataProp <- c(.3,.1,0,.2,0,.2,.2,0,0)
+
+TestData1 <- rnbinom(10,3,.3) #this is data that meets Benford's law!
+BenfordLawStats(TestData1)
+TrueTestData1Dist <- c(3,1,0,2,0,2,2,0,0)
+TrueTestData1Prop <- c(.3,.1,0,.2,0,.2,.2,0,0)
 Mlogs <- -log10(1+1/1:9)
-TrueMstats <- TrueTestDataProp+Mlogs
-sqrt(10)*max(TrueMstats) # 0.4490689 
-TrueTestDataLeemisM <- sqrt(10)*max(TrueMstats)
+TrueMstats1 <- TrueTestData1Prop+Mlogs
+TrueTestData1LeemisM <- sqrt(10)*max(TrueMstats1)
 
-TrueDSquared <- TrueMstats^2
-TrueDSum <- sum(TrueDSquared)
-TrueDroot <- sqrt(TrueDSum)
-TrueTestDataChoGainsD <- sqrt(10)*TrueDroot
+TrueDSquared1 <- TrueMstats1^2
+TrueDSum1 <- sum(TrueDSquared1)
+TrueDroot1 <- sqrt(TrueDSum1)
+TrueTestData1ChoGainsD <- sqrt(10)*TrueDroot1
 
-TestData2 <- rnorm(100,10)
+TestData2 <- rnorm(10,10) #Test Data where Benford's law is NOT met. 
 BenfordLawStats(TestData2)
+TrueTestData2Dist <- c(8,0,0,0,0,0,0,1,1)
+TrueTestData2Prop <- c(.8,0,0,0,0,0,0,.1,.1)
+TrueMstats2 <- TrueTestData2Prop+Mlogs
+TrueTestData2LeemisM <- sqrt(10)*max(TrueMstats2)
 
-BLawTest(TestData1, TrueTestDataDist,TrueTestDataLeemisM,TrueTestDataChoGainsD,digits=3)
+TrueDSquared2 <- TrueMstats2^2
+TrueDSum2 <- sum(TrueDSquared2)
+TrueDroot2 <- sqrt(TrueDSum2)
+TrueTestData2ChoGainsD <- sqrt(10)*TrueDroot2
 
-  #A. You must be able to run all of hte unit tests using a single function.  This will probably be easiest if you write sub-functions
+BLawTest(TestData1, TrueTestData1Dist,TrueTestData1LeemisM,TrueTestData1ChoGainsD,TestData2, TrueTestData2Dist,TrueTestData2LeemisM,TrueTestData2ChoGainsD,digits=3) #Compares my function to the truth, and returns a TRUE for both sets of test data, as required. Also returns the results of the BenfordLawStats function, as required.
 
-  #B. It must calculate the Benford’s distribution and test statistics for some dataset (that you must choose) where Benford’s law is met.
+#The function also works with only one data set: 
+BLawTest(TestData1, TrueTestData1Dist,TrueTestData1LeemisM,TrueTestData1ChoGainsD,digits=3) #Simply gives a NULL as the output for the element of the list called "TestData2Results" 
 
-  #C. It must calculate the Benford’s distribution and test statistics for some dataset (that you must choose) where Benford’s law is not met.
-
-  #D. It must use your functions above to compare to the “truth” for the digit distributions and two test statistics.
-
-  #E. It must return a ’TRUE’ if all unit tests are passed.
-
-  #F. It must return a ’FALSE’ if all unit test are not passed, and it must clearly identifywhere the function is broken. To be clear, it should be able to identify when:
-
-    #The function calculates the wrong Benford’s distribution for dataset 1
-  
-    #The function calculates the wrong Benford’s distribution for dataset 2
-
-    #The function calculates the m or D statistic for dataset 1
-
-    #The function calculates the m or D statistic for dataset 2
-
-#2.For each way that the function can fail this test, create a branch where you edit the code in some way to make the code fail to pass the unit testing.
 
