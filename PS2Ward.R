@@ -13,6 +13,9 @@ setwd("~/Documents/WashU 2nd Year/Applied Stats Programming/Jan 30/PS2/ProblemSe
 
 # this little function takes as input a vector, and then returns a character vector of only the first element of that vector
 IntegerSelector <- function(x){
+  x <- sapply(x,gsub,pattern="-",replacement="") #these next three lines are necessary to deal with negatives and decimals! 
+  x <- sapply(x,gsub,pattern="0",replacement="")
+  x <- sapply(x,gsub,pattern="\\.",replacement="")
   sapply(x,substr,start=1,stop=1)}  
 IntegerSelector(19:25) # See it in action. 
 
@@ -38,7 +41,7 @@ ChoGainsD <- function(x){
 }
 
 #takes as inputs x, a vector or matrix of election results, and statistics, which can be specified as "m" for Leemis M, "d" for Cho-Gains D, or both "m" and "d" which returns both (this is the default).  Any other elements in statistic are ignored unless neither "m" nor "d" are present, in which case the function returns the digit distribution and a message asking the user to set statistic to m and/or d.   
-BenfordLawStats <- function(x,statistic=c("m","d")){  #choose your statistic: m or d! defaults to both. 
+BenfordLawStats <- function(x,statistic=c("m","d")){  #choose your statistic: m or d! defaults to both.
   
   #coerce whatever input you give into a numeric matrix.  (vectors become a 1 column matrix.)
   VoteTotals <- apply(as.matrix(x),2,as.numeric) 
@@ -69,7 +72,7 @@ BenfordLawStats <- function(x,statistic=c("m","d")){  #choose your statistic: m 
     #Again, since Proportions should always have 9 rows, the use of ChoGainsD and apply allows us to estimate these statistics.  
     d.stats <- apply(Proportions,2, ChoGainsD)
     d.stats <- sqrt(nrow(VoteTotals))*d.stats #multiplies by the square root of the number of observations, as suggested by Myunghoon.  
-    names(d.stats) <- colnames(x) # for easy interpretation (This line may be unneccesary!)
+    names(d.stats) <- colnames(VoteTotals) # for easy interpretation (This line may be unneccesary!)
   }
   
   #and finally, neither
@@ -163,19 +166,6 @@ BenfordLawStats(nines)
 ########### 3. Testing ##########
 
 #1. Develop a function that will unit test your function. This function can be designed in any way you like, but bust meet the following conditions:
-set.seed(1801)
-TestData1 <- rnbinom(10,3,.3)
-TrueTestDataDist <- c(3,1,0,2,0,2,2,0,0)
-TrueTestDataProp <- c(.3,.1,0,.2,0,.2,.2,0,0)
-Mlogs <- -log10(1+1/1:9)
-TrueMstats <- TrueTestDataProp+Mlogs
-sqrt(10)*max(TrueMstats) # 0.4490689 
-TrueTestDataLeemisM <- sqrt(10)*max(TrueMstats)
-
-TrueDSquared <- TrueMstats^2
-TrueDSum <- sum(TrueDSquared)
-TrueDroot <- sqrt(TrueDSum)
-TrueTestDataChoGainsD <- sqrt(10)*TrueDroot
 
 #The function takes some test data, and then the "true" statistic and distribution for this data, plus the number of digits to calculate equality to 
 BLawTest <- function(TestData,TrueTestDataDist,TrueTestDataLeemisM,TrueTestDataChoGainsD,digits=3){
@@ -221,6 +211,24 @@ BLawTest <- function(TestData,TrueTestDataDist,TrueTestDataLeemisM,TrueTestDataC
   #the result is a true or false plus any messages printed into the console with cat()
   return(test.result)
 }
+
+# Make up some random data, and calculate the "True Values" for this data
+set.seed(1801) #for replicatability 
+TestData1 <- rnbinom(10,3,.3) #this is data that meets Benford's law! 
+TrueTestDataDist <- c(3,1,0,2,0,2,2,0,0)
+TrueTestDataProp <- c(.3,.1,0,.2,0,.2,.2,0,0)
+Mlogs <- -log10(1+1/1:9)
+TrueMstats <- TrueTestDataProp+Mlogs
+sqrt(10)*max(TrueMstats) # 0.4490689 
+TrueTestDataLeemisM <- sqrt(10)*max(TrueMstats)
+
+TrueDSquared <- TrueMstats^2
+TrueDSum <- sum(TrueDSquared)
+TrueDroot <- sqrt(TrueDSum)
+TrueTestDataChoGainsD <- sqrt(10)*TrueDroot
+
+TestData2 <- rnorm(100,10)
+BenfordLawStats(TestData2)
 
 BLawTest(TestData1, TrueTestDataDist,TrueTestDataLeemisM,TrueTestDataChoGainsD,digits=3)
 
