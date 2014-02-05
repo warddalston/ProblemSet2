@@ -63,7 +63,7 @@ BenfordLawStats <- function(x,statistic=c("m","d")){  #choose your statistic: m 
   if(any(statistic%in%"m")){ 
   #Proportions should always have 9 rows, meaning that simply using my LeemisM function and apply allows us to estimate this statistic.  
     m.stats <- apply(Proportions,2, LeemisM )
-    m.stats <- sqrt(nrow(VoteTotals))*m.stats #multiplies by the square root of the number of observations, as suggested by Myunghoon.  
+   # m.stats <- sqrt(nrow(VoteTotals))*m.stats #multiplies by the square root of the number of observations, as suggested by Myunghoon.  
     names(m.stats) <- colnames(VoteTotals) #for easily understandable output 
   } 
   
@@ -71,7 +71,7 @@ BenfordLawStats <- function(x,statistic=c("m","d")){  #choose your statistic: m 
   if(any(statistic%in%"d")){
     #Again, since Proportions should always have 9 rows, the use of ChoGainsD and apply allows us to estimate these statistics.  
     d.stats <- apply(Proportions,2, ChoGainsD)
-    d.stats <- sqrt(nrow(VoteTotals))*d.stats #multiplies by the square root of the number of observations, as suggested by Myunghoon.  
+    #d.stats <- sqrt(nrow(VoteTotals))*d.stats #multiplies by the square root of the number of observations, as suggested by Myunghoon.  
     names(d.stats) <- colnames(VoteTotals) # for easy interpretation (This line may be unneccesary!)
   }
   
