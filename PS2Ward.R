@@ -283,10 +283,10 @@ TrueDSum1 <- sum(TrueDSquared1)
 TrueDroot1 <- sqrt(TrueDSum1)
 TrueTestData1ChoGainsD <- sqrt(10)*TrueDroot1
 
-TestData2 <- rnorm(10,10) #Test Data where Benford's law is NOT met. 
+TestData2 <- rnorm(10,0) #Test Data where Benford's law is NOT met. 
 BenfordLawStats(TestData2)
-TrueTestData2Dist <- c(8,0,0,0,0,0,0,1,1)
-TrueTestData2Prop <- c(.8,0,0,0,0,0,0,.1,.1)
+TrueTestData2Dist <- c(7,0,0,0,1,1,1,0,0)
+TrueTestData2Prop <- c(.7,0,0,0,.1,.1,.1,0,0)
 TrueMstats2 <- TrueTestData2Prop+Mlogs
 TrueTestData2LeemisM <- sqrt(10)*max(TrueMstats2)
 
