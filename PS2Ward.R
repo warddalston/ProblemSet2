@@ -295,11 +295,11 @@ TrueDSum2 <- sum(TrueDSquared2)
 TrueDroot2 <- sqrt(TrueDSum2)
 TrueTestData2ChoGainsD <- sqrt(10)*TrueDroot2
 
-BLawTest(TestData1, TrueTestData1Dist,TrueTestData1LeemisM,TrueTestData1ChoGainsD,TestData2, TrueTestData2Dist,TrueTestData2LeemisM,TrueTestData2ChoGainsD,digits=3) #Compares my function to the truth, and returns a TRUE for both sets of test data, as required. Also returns the results of the BenfordLawStats function, as required.
+BLawTest(TestData1, TrueTestData1Prop,TrueTestData1LeemisM,TrueTestData1ChoGainsD,TestData2, TrueTestData2Prop,TrueTestData2LeemisM,TrueTestData2ChoGainsD,digits=3) #Compares my function to the truth, and returns a TRUE for both sets of test data, as required. Also returns the results of the BenfordLawStats function, as required.
 
 ###Note, it reports that the distribution didn't calculate correctly, and the function reports this! (as required!) 
 
 #The function also works with only one data set: 
-BLawTest(TestData1, TrueTestData1Dist,TrueTestData1LeemisM,TrueTestData1ChoGainsD,digits=3) #Simply gives a NULL as the output for the element of the list called "TestData2Results" 
+BLawTest(TestData1, TrueTestData1Prop,TrueTestData1LeemisM,TrueTestData1ChoGainsD,digits=3) #Simply gives a NULL as the output for the element of the list called "TestData2Results" 
 
 ###Note, it reports that the distribution didn't calculate correctly, and the function reports this! (as required!) 
