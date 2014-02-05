@@ -80,7 +80,7 @@ BenfordLawStats <- function(x,statistic=c("m","d")){  #choose your statistic: m 
     warning("Please set statistic to m and/or d!") #all you get back is a warning here.  Don't choose things that aren't m or d! 
     stop
   }
-  output <- list(LeemisM=m.stats,ChoGainsD=d.stats,DigitDistribution=IntegerTotals) #put everything together in a list
+  output <- list(LeemisM=m.stats,ChoGainsD=d.stats,DigitDistribution=Proportions) #put everything together in a list
   class(output) <- "benfords" #so that I can use a fancy version of print on my function!
   return(output)
 }
@@ -295,9 +295,9 @@ TrueDSum2 <- sum(TrueDSquared2)
 TrueDroot2 <- sqrt(TrueDSum2)
 TrueTestData2ChoGainsD <- sqrt(10)*TrueDroot2
 
-BLawTest(TestData1, TrueTestData1Dist,TrueTestData1LeemisM,TrueTestData1ChoGainsD,TestData2, TrueTestData2Dist,TrueTestData2LeemisM,TrueTestData2ChoGainsD,digits=3) #Compares my function to the truth, and returns a TRUE for both sets of test data, as required. Also returns the results of the BenfordLawStats function, as required.
+BLawTest(TestData1, TrueTestData1Prop,TrueTestData1LeemisM,TrueTestData1ChoGainsD,TestData2, TrueTestData2Prop,TrueTestData2LeemisM,TrueTestData2ChoGainsD,digits=3) #Compares my function to the truth, and returns a TRUE for both sets of test data, as required. Also returns the results of the BenfordLawStats function, as required.
 
 #The function also works with only one data set: 
-BLawTest(TestData1, TrueTestData1Dist,TrueTestData1LeemisM,TrueTestData1ChoGainsD,digits=3) #Simply gives a NULL as the output for the element of the list called "TestData2Results" 
+BLawTest(TestData1, TrueTestData1Prop,TrueTestData1LeemisM,TrueTestData1ChoGainsD,digits=3) #Simply gives a NULL as the output for the element of the list called "TestData2Results" 
 
 
