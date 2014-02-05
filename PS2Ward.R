@@ -53,7 +53,7 @@ BenfordLawStats <- function(x,statistic=c("m","d")){  #choose your statistic: m 
  IntegerTotals <- apply(FirstSignificantDigit,2,LetterCounter)
   
   #Now divide these totals by the total number of rows to get proportions
-  Proportions <- IntegerTotals/nrow(VoteTotals)
+  Proportions <- IntegerTotals/nrow(IntegerTotals) #Changed the nrow() from "VoteTotals" to "IntegerTotals", which causes the unit test to fail, and report that the unit test of data 1 failed at Cho-Gains'd .
   
   #for when only one of the two stats is calculated...
   m.stats <- NULL
@@ -80,7 +80,7 @@ BenfordLawStats <- function(x,statistic=c("m","d")){  #choose your statistic: m 
     warning("Please set statistic to m and/or d!") #all you get back is a warning here.  Don't choose things that aren't m or d! 
     stop
   }
-  output <- list(LeemisM=m.stats,ChoGainsD=d.stats,DigitDistribution=IntegerTotals) #put everything together in a list
+  output <- list(LeemisM=m.stats,ChoGainsD=d.stats,DigitDistribution=Proportions) #put everything together in a list
   class(output) <- "benfords" #so that I can use a fancy version of print on my function!
   return(output)
 }
@@ -297,7 +297,9 @@ TrueTestData2ChoGainsD <- sqrt(10)*TrueDroot2
 
 BLawTest(TestData1, TrueTestData1Dist,TrueTestData1LeemisM,TrueTestData1ChoGainsD,TestData2, TrueTestData2Dist,TrueTestData2LeemisM,TrueTestData2ChoGainsD,digits=3) #Compares my function to the truth, and returns a TRUE for both sets of test data, as required. Also returns the results of the BenfordLawStats function, as required.
 
+###Note, it reports that the distribution didn't calculate correctly, and the function reports this! (as required!) 
+
 #The function also works with only one data set: 
 BLawTest(TestData1, TrueTestData1Dist,TrueTestData1LeemisM,TrueTestData1ChoGainsD,digits=3) #Simply gives a NULL as the output for the element of the list called "TestData2Results" 
 
-
+###Note, it reports that the distribution didn't calculate correctly, and the function reports this! (as required!) 
