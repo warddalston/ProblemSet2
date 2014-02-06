@@ -12,6 +12,8 @@ setwd("~/Documents/WashU 2nd Year/Applied Stats Programming/Jan 30/PS2/ProblemSe
 #First, write out several "mini functions" used within the Benford Law Stats function:
 
 # this little function takes as input a vector, and then returns a character vector of only the first element of that vector
+# input: vector
+# output: vector with the first non "0",".", or "-" character of each element of the input vector
 IntegerSelector <- function(x){
   x <- sapply(x,gsub,pattern="-",replacement="") #these next three lines are necessary to deal with negatives and decimals! 
   x <- sapply(x,gsub,pattern="0",replacement="")
@@ -20,18 +22,24 @@ IntegerSelector <- function(x){
 IntegerSelector(19:25) # See it in action. 
 
 # This function is designed to take as input a vector of single digit numbers.  It then uses grep to identify the elements of that vector beggining with each of the 9 single digit positive integers.  Next, it counts how often each of the 9 digits occurs, and returns a vector of length 9 with this information for each digit.  The return vector is arranged in ascending order, and has the single digit integers as names.  (can be used on matrices with the help of apply(), in which case it returns a matrix!)
+# input: vector of single digit integers
+# output: vector of length 9, with the integers 1:9 as its names (in ascending order)
 LetterCounter <- function(x){
   out <- sapply(as.character(1:9),grep,x,simplify=FALSE)
   lengths <- sapply(out,length,USE.NAMES=TRUE)
   return(lengths)
 }
 
-#Performs the calculations necesary to estimate the Leemis M statistic. The input should be a length 9 vector (such as the columns of the output of my LetterCounter function)  
+#Performs the calculations necesary to estimate the Leemis M statistic. 
+# input: a length 9 vector (such as the columns of the output of my LetterCounter function)  
+# output: a scalar
 LeemisM <- function(x){
   max(x-log10(1+1/(1:9))) #because of R's vectorization and the fact that the input should be length 9, the use of 1:9 inside of the log10 function works correctly.  
 }
 
-#This performs the calculations necessary for the estimation of the Cho-Gains D statistic.  Again, the input should be length 9.  
+#This performs the calculations necessary for the estimation of the Cho-Gains D statistic.
+# input: should be a vector of length 9.  
+# output: a scalar 
 ChoGainsD <- function(x){ 
   inner <- x-log10(1+1/(1:9)) #takes advantage of vectorization and proportions always having 9 rows as well. 
   inner.sq <- inner^2 #more vectorization
@@ -40,7 +48,9 @@ ChoGainsD <- function(x){
   return(final)
 }
 
-#takes as inputs x, a vector or matrix of election results, and statistics, which can be specified as "m" for Leemis M, "d" for Cho-Gains D, or both "m" and "d" which returns both (this is the default).  Any other elements in statistic are ignored unless neither "m" nor "d" are present, in which case the function returns the digit distribution and a message asking the user to set statistic to m and/or d.   
+#takes as inputs x, a vector or matrix of election results, and statistics, which can be specified as "m" for Leemis M, "d" for Cho-Gains D, or both "m" and "d" which returns both (this is the default).  Any other elements in statistic are ignored unless neither "m" nor "d" are present, in which case the function returns the digit distribution and a message asking the user to set statistic to m and/or d. 
+# Input: integer or numeric vector or matrix
+# Output: list with three elements: the proportion distribution, the calculated Leemis' m and the calculated Cho-Gains' d.
 BenfordLawStats <- function(x,statistic=c("m","d")){  #choose your statistic: m or d! defaults to both.
   
   #coerce whatever input you give into a numeric matrix.  (vectors become a 1 column matrix.)
@@ -92,7 +102,8 @@ BenfordLawStats(x)
 ########### 2. Critical Values  ##########
 
 #some functions to call within my function:
-
+# nput: a scalar, and optionally the number digits to print.
+# output: a character vector of length 1
 AlphaChecksM <- function(x,...) { #function will check for significance of M stats
     x <- round(x,...)
   if( 0.851 <= x & x < .967 ){ # 0.10
@@ -107,6 +118,8 @@ AlphaChecksM <- function(x,...) { #function will check for significance of M sta
   return(x)
 }
 
+#input: a scalar and optionally, the number of digits to print
+#output: a character vector of length 1 
 AlphaChecksD <- function(x,...) { #function will check for significance of D stats
     x <- round(x,...)
   if( 1.212 <= x & x < 1.330 ){ # 0.10
@@ -122,6 +135,8 @@ AlphaChecksD <- function(x,...) { #function will check for significance of D sta
 }
 
 #prints the lines of my output functions
+# input: a vector of length 1, with or without a name
+# output: prints the input to the console along with some relevent information 
 StatPrinter <- function(x){
   if(!is.null(names(x))){ #if the object has a name, it prints the name alongside the test statistic
   cat("Column name: ", as.name(names(x)),"-", "Test Statistic: ", x, "\n")  
@@ -129,6 +144,8 @@ StatPrinter <- function(x){
 }
 
 #this is my function.  By naming it this way and classifying BenfordLawStats output as "BenfordLaw" it will automatically call when I run the BenfordLawStats function without saving the output to an object.  
+#input: a benfords object (produced by my BenfordLawStats function, above)
+#output: prints information about the benford law object to the console. 
 print.benfords <- function(x,digits=3){ #note: one can change the number of digits reported. 
   if(!is.null(x$LeemisM)) { #do these things when the Leemis' M is being calculated
     cat("Null hypothesis: no fraud","\n")
@@ -167,7 +184,10 @@ BenfordLawStats(nines)
 
 #1. Develop a function that will unit test your function. This function can be designed in any way you like, but bust meet the following conditions:
 
-#The function takes some test data, and then the "true" statistic and distribution for this data, plus the number of digits to calculate equality to 
+#this function unit tests one or two sets of data against the output of my BenfordLawStats folder.  It does this by used identical() to compare the true values by the values reported by the function.  
+
+#input: required: a set of data, along with the "True" benford stat values for this data.  Optional: a second set of data and true values, and the number of digits to compare to.  
+#output: prints the result of the unit test, along with information about where the test failed.  Also prints the output of the benford law stats function.  
 BLawTest <- function(TestData1,TrueTestData1Dist,TrueTestData1LeemisM,TrueTestData1ChoGainsD,TestData2=NULL,TrueTestData2Dist=NULL,TrueTestData2LeemisM=NULL,TrueTestData2ChoGainsD=NULL,digits=3){
 
   #The funciton is divided into two sections: One for Test Data 1, another for Test Data 2. At least one set of Test Data is required.  The second set of Test Data is optional
